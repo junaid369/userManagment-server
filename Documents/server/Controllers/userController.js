@@ -63,9 +63,29 @@ module.exports = {
 
     try {
       let file = req.file;
-      const result = await uploadFile(file);
+      if(file){
 
-      let user = await db
+        const result = await uploadFile(file);
+        let user = await db
+          .get()
+          .collection(USER_COLLECTION)
+          .updateOne(
+            { _id: ObjectId(id) },
+            {
+              $set: {
+                Fullname: fullname,
+                Email: email,
+                Mobile: mobile,
+                Date: date,
+                Radio: radio,
+                Path: result.Location,
+              },
+            }
+          );
+          res.status(200).json({ message: "update", user });
+      }
+      else{
+        let user = await db
         .get()
         .collection(USER_COLLECTION)
         .updateOne(
@@ -77,12 +97,13 @@ module.exports = {
               Mobile: mobile,
               Date: date,
               Radio: radio,
-              Path: result.Location,
             },
           }
         );
+        res.status(200).json({ message: "update", user });
+      }
 
-      res.status(200).json({ message: "update", user });
+
     } catch (err) {
       console.log(err);
       res.status(500).json({ err: err.message });
